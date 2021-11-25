@@ -20,13 +20,21 @@ func main() {
 	fmt.Println(len(arguments), e_string)
 
 	var res float64 = 0
+	var average float64 = 0
 
 	for i := 1; i < len(arguments); i++ {
-		n, _ := strconv.ParseFloat(arguments[i], 64)
-		fmt.Println(n)
-		res = res + n
+		if arguments[i] != "END" {
+			n, _ := strconv.ParseFloat(arguments[i], 64)
+			fmt.Println(n)
+			res = res + n
+		} else {
+			continue
+		}
 	}
-	fmt.Println(res)
+
+	average = res / 2
+
+	fmt.Println(average)
 
 	//	io.WriteString(os.Stdout, e_string)
 
