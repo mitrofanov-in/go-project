@@ -15,7 +15,7 @@ func main() {
 	if len(arguments) == 1 {
 		e_string = "good"
 	} else {
-		e_string = arguments[6]
+		e_string = arguments[1]
 	}
 	fmt.Println(len(arguments), e_string)
 
@@ -35,31 +35,6 @@ func main() {
 	average = res / 2
 
 	fmt.Println(average)
-
-	test_slice := []int{}
-
-	test_slice = append(test_slice, 101)
-	tmp := make([]int, 10)
-
-	for _, i := range tmp {
-		fmt.Println(tmp[i])
-	}
-	fmt.Println(test_slice[0])
-
-	twoS := make([][]int, 6)
-
-	for i := 0; i < len(twoS); i++ {
-		for j := 0; j < 2; j++ {
-			twoS[i] = append(twoS[i], i+j)
-		}
-	}
-
-	for _, s := range twoS {
-		for x, z := range s {
-			fmt.Println(x, z)
-		}
-		fmt.Println()
-	}
 
 	//	io.WriteString(os.Stdout, e_string)
 
