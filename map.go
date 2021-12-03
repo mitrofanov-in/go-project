@@ -42,8 +42,17 @@ func main() {
 		fmt.Println("super")
 	}
 
-	//t_int,_ := strconv.ParseInt(x_int, 10, 64)
-
 	fmt.Println(tMap, oMap)
+
+	for _, value := range testMap {
+		switch value.(type) {
+		case int:
+			fmt.Println("int", value, value.(int))
+		case string:
+			fmt.Println("string", value, len(value.(string)))
+		}
+	}
+
+	//t_int,_ := strconv.ParseInt(x_int, 10, 64)
 
 }
