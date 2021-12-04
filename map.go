@@ -55,4 +55,13 @@ func main() {
 
 	//t_int,_ := strconv.ParseInt(x_int, 10, 64)
 
+	xar := [5]int{1, 2, 6, 7, 10}
+	xar_st := [5]string{"j", "k", "s", "say", "bay"}
+	xMap := make(map[string]int)
+
+	for j := 0; j < len(xar); j++ {
+		xMap[xar_st[j]] = j
+		fmt.Println(xMap)
+	}
+	fmt.Println(xMap)
 }
