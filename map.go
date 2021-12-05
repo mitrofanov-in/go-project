@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 
 	//t_int,_ := strconv.ParseInt(x_int, 10, 64)
 
-	xar := [5]int{1, 2, 6, 7, 10}
+	xar := [5]int64{1, 2, 6, 7, 10}
 	xar_st := [5]string{"j", "k", "s", "say", "bay"}
 	xMap := make(map[string]int)
 
@@ -64,4 +65,7 @@ func main() {
 		fmt.Println(xMap)
 	}
 	fmt.Println(xMap)
+
+	s_str := strconv.FormatInt(xar[3], 10)
+	fmt.Println(s_str)
 }
