@@ -35,13 +35,9 @@ func main() {
 
 	sizeInBytes := uint32(malgo.SampleSizeInBytes(deviceConfig.Capture.Format))
 	onRecvFrames := func(pSample2, pSample []byte, framecount uint32) {
-
 		sampleCount := framecount * deviceConfig.Capture.Channels * sizeInBytes
-
 		newCapturedSampleCount := capturedSampleCount + sampleCount
-
 		pCapturedSamples = append(pCapturedSamples, pSample...)
-
 		capturedSampleCount = newCapturedSampleCount
 
 	}
