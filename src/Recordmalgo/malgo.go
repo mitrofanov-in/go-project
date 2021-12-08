@@ -8,6 +8,11 @@ import (
 	"github.com/gen2brain/malgo"
 )
 
+const (
+	bits = 32
+	rate = 44100
+)
+
 func main() {
 	ctx, err := malgo.InitContext(nil, malgo.ContextConfig{}, func(message string) {
 		fmt.Printf("LOG <%v>\n", message)
@@ -20,6 +25,13 @@ func main() {
 		_ = ctx.Uninit()
 		ctx.Free()
 	}()
+
+	wavOut, err := os.Create("Test.wav")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+		defer wavOut.Close()
+	}
 
 	deviceConfig := malgo.DefaultDeviceConfig(malgo.Duplex)
 	deviceConfig.Capture.Format = malgo.FormatS16
@@ -35,9 +47,17 @@ func main() {
 
 	sizeInBytes := uint32(malgo.SampleSizeInBytes(deviceConfig.Capture.Format))
 	onRecvFrames := func(pSample2, pSample []byte, framecount uint32) {
+
 		sampleCount := framecount * deviceConfig.Capture.Channels * sizeInBytes
+
 		newCapturedSampleCount := capturedSampleCount + sampleCount
+
 		pCapturedSamples = append(pCapturedSamples, pSample...)
+		_, err = wavOut.Write(pSample)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		capturedSampleCount = newCapturedSampleCount
 
 	}
