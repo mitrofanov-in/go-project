@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aleitner/microphone"
 	"github.com/faiface/beep/wav"
@@ -28,7 +29,12 @@ func main() {
 		ctx.Free()
 	}()
 
-	wavOut, err := os.Create("Test.wav")
+	filename := os.Args[1]
+	if !strings.HasSuffix(filename, ".wav") {
+		filename += ".wav"
+	}
+
+	wavOut, err := os.Create(filename)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

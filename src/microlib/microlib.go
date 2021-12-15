@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -37,7 +38,12 @@ func main() {
 						ctx.Free()
 					}()
 
-					f, err := os.Create("1.wav")
+					filename := os.Args[2]
+					if !strings.HasSuffix(filename, ".wav") {
+						filename += ".wav"
+					}
+
+					f, err := os.Create(filename)
 					if err != nil {
 						log.Fatal(err)
 					}
