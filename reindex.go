@@ -71,7 +71,7 @@ func deleteIndex(nameIndex string, DataIndex string) string {
 	var passwd string = os.Getenv("PASS_ES")
 	var url string = os.Getenv("URL_ES")
 	client := &http.Client{}
-	req, err := http.NewRequest("DELETE", url+"/"+nameIndex+DataIndex+"*", nil)
+	req, err := http.NewRequest("DELETE", url+"/"+nameIndex+"-"+DataIndex+"*", nil)
 	//req.Header.Add("Content-Type", "application/json")
 	req.SetBasicAuth(username, passwd)
 	resp, err := client.Do(req)
