@@ -21,6 +21,8 @@ type Dest struct {
 	Index string `json:"index"`
 }
 
+var bodyStat int = 0
+
 func basicAuth(nameIndex string, DataIndex string) string {
 
 	ElasticReidex := IndexELASTIC{
@@ -48,7 +50,10 @@ func basicAuth(nameIndex string, DataIndex string) string {
 	}
 	bodyText, err := ioutil.ReadAll(resp.Body)
 	s := string(bodyText)
+
+	bodyStat = resp.StatusCode
 	return s
+
 }
 
 func deleteIndex(nameIndex string, DataIndex string) string {
@@ -67,20 +72,26 @@ func deleteIndex(nameIndex string, DataIndex string) string {
 
 	   jStr := []byte(jsonDataSort)
 	*/
-	var username string = os.Getenv("USER_ES")
-	var passwd string = os.Getenv("PASS_ES")
-	var url string = os.Getenv("URL_ES")
-	client := &http.Client{}
-	req, err := http.NewRequest("DELETE", url+"/"+nameIndex+"-"+DataIndex+"*", nil)
-	//req.Header.Add("Content-Type", "application/json")
-	req.SetBasicAuth(username, passwd)
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
+
+	if bodyStat == 200 {
+		var username string = os.Getenv("USER_ES")
+		var passwd string = os.Getenv("PASS_ES")
+		var url string = os.Getenv("URL_ES")
+		client := &http.Client{}
+		req, err := http.NewRequest("DELETE", url+"/"+nameIndex+"-"+DataIndex+"*", nil)
+		//req.Header.Add("Content-Type", "application/json")
+		req.SetBasicAuth(username, passwd)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyText, err := ioutil.ReadAll(resp.Body)
+		s := string(bodyText)
+		return s
+	} else {
+		j := "error check indexes"
+		return j
 	}
-	bodyText, err := ioutil.ReadAll(resp.Body)
-	s := string(bodyText)
-	return s
 }
 
 func main() {
