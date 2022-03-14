@@ -67,25 +67,13 @@ func main() {
 	/*
 		for _, file := range files {
 			if !file.IsDir() {
-				origName := filepath.Join(e_string, file.Name())
+				origName := filepath.Join(path, file.Name())
 				newName := strings.ReplaceAll(origName, "_", " ")
 				os.Rename(origName, newName)
 			} else {
 
 					}
 				}
-	*/
-
-	/*
-			tmpName := filepath.Join(e_string, file.Name())
-		    if err != nil {
-				log.Fatal(err)
-			}
-			for _, tFile := range tmp {
-				origName := filepath.Join(tmpName, tFile.Name())
-				newName := strings.ReplaceAll(origName, "_", " ")
-				os.Rename(origName, newName)
-			}
 	*/
 
 }
