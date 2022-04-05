@@ -1,0 +1,77 @@
+global:
+  scrape_interval:     15s
+
+rule_files:
+  - 'services.rules'
+
+#alert
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      - "alertmanager:9093"
+
+scrape_configs:
+  - job_name: "prometheus"
+    scrape_interval: 5s
+    static_configs:
+    - targets: ["prometheus:9090"]
+    basic_auth:
+      username: "admin"
+      password: "U7L@_+2&!^*js&UbsfS"
+
+
+  - job_name: "node"
+    static_configs:
+    - targets: ["node-exporter:9100"]
+
+  - job_name: 'blackbox-http_2xx-general'
+    # scheme: http
+    scrape_interval: 20s
+    metrics_path: /probe
+    params:
+      module: [http_2xx-general]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        - https://boostra.ru    # Target to probe with http.
+        #- https://boostra-crm.ru   # Target to probe with https.
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115  # The blackbox exporter's real hostname:port.
+
+  - job_name: 'blackbox-http_2xx-crm'
+    # scheme: http
+    scrape_interval: 20s
+    metrics_path: /probe
+    params:
+      module: [http_2xx-crm]  # Look for a HTTP 200 response.
+    static_configs:
+      - targets:
+        #- https://boostra.ru    # Target to probe with http.
+        - https://manager.boostra.ru   # Target to probe with https.
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115  # The blackbox exporter's real hostname:port.
+
+  - job_name: 'script_test'
+    # scheme: http
+    scrape_interval: 20s
+    metrics_path: /probe
+    params:
+      script: [test]
+      prefix: [script]
+    static_configs:
+    - targets:
+      - script-exporter:9469
+    relabel_configs:
+      - target_label: script
+        replacement: test
