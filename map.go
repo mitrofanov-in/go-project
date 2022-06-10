@@ -64,7 +64,7 @@ func main() {
 		xMap[xar_st[j]] = j
 		fmt.Println(xMap)
 	}
-	fmt.Println(xMap)
+	fmt.Println("xMap", xMap)
 
 	s_str := strconv.FormatInt(xar[3], 10)
 	fmt.Println(s_str)
