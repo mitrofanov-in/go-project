@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
 
 var cookie []*http.Cookie
@@ -25,65 +24,74 @@ type Results struct {
 
 var content []Results
 
-func main() {
-
+func GetAuthParmas(payload_lgn []byte) []*http.Cookie {
 	url_lgn := "http://allure.back.wd.xco.devel.ifx/login"
 	method := "POST"
 
-	payload_lgn := strings.NewReader(`{ "username": "xco","password": "xco_interf@x" }`)
-
 	client := &http.Client{}
-	req_lgn, err := http.NewRequest(method, url_lgn, payload_lgn)
+	req_lgn, err := http.NewRequest(method, url_lgn, bytes.NewBuffer(payload_lgn))
 
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
 	req_lgn.Header.Add("Content-Type", "application/json")
 
 	res_lgn, err := client.Do(req_lgn)
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
 	cookie = res_lgn.Cookies() //save cookies
 	defer res_lgn.Body.Close()
 
+	fmt.Println("PRINT ALL COOCKIE")
 	for _, c := range cookie {
 		fmt.Println(c.Name, c.Value)
 
 	}
 
-	url_proj := "http://allure.back.wd.xco.devel.ifx/projects"
-	method_proj := "POST"
+	//SAVE COOCKIE CSRF
 
-	payload_proj := strings.NewReader(`{ "id": "default" }`)
+	return cookie
+}
 
-	req_proj, err := http.NewRequest(method_proj, url_proj, payload_proj)
+func SendResult(jStr []byte) {
+
+	url_send := "http://allure.back.wd.xco.devel.ifx/send-results?project_id=default"
+	method_send := "POST"
+
+	client := &http.Client{}
+	req_send, err := http.NewRequest(method_send, url_send, bytes.NewBuffer(jStr))
 	if err != nil {
 		panic(err)
 	}
 	for i := range cookie {
-		req_proj.AddCookie(cookie[i])
+		req_send.AddCookie(cookie[i])
 
 	}
-	tmpCSRF := cookie[1]
-	req_proj.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
-	req_proj.Header.Add("Content-Type", "application/json")
-	resp_proj, err := client.Do(req_proj)
+	req_send.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
+	req_send.Header.Add("Content-Type", "application/json")
+	resp_send, err := client.Do(req_send)
 	if err != nil {
 		panic(err)
 	}
-	defer resp_proj.Body.Close()
+	defer req_send.Body.Close()
 
-	body, err := ioutil.ReadAll(resp_proj.Body)
+	body_send, err := ioutil.ReadAll(resp_send.Body)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(body), resp_proj.StatusCode)
+	fmt.Println("INFO ABOUT SEND FILES", string(body_send), resp_send.StatusCode)
 
-	url_send := "http://allure.back.wd.xco.devel.ifx/send-results?project_id=default"
-	method_send := "POST"
+}
+
+func main() {
+
+	payload_lgn := []byte(`{ "username": "xco","password": "xco_interf@x" }`)
+	fmt.Println(string(payload_lgn))
+	GetAuthParmas(payload_lgn)
+
+	tmpCSRF = cookie[1]
+	fmt.Println("COOCKA", tmpCSRF.Value)
 
 	var filesToSend []string
 	var base64ToSend []string
@@ -97,6 +105,8 @@ func main() {
 			base64ToSend = append(base64ToSend, bs64)
 		}
 	}
+	fmt.Println("1строка", filesToSend)
+	fmt.Println("2строка", base64ToSend)
 
 	xLen := len(filesToSend)
 
@@ -114,26 +124,6 @@ func main() {
 
 	fmt.Println(string(jStr))
 
-	req_send, err := http.NewRequest(method_send, url_send, bytes.NewBuffer(jStr))
-	if err != nil {
-		panic(err)
-	}
-	for i := range cookie {
-		req_send.AddCookie(cookie[i])
-
-	}
-	req_send.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
-	req_send.Header.Add("Content-Type", "application/json")
-	resp_send, err := client.Do(req_send)
-	if err != nil {
-		panic(err)
-	}
-	defer resp_proj.Body.Close()
-
-	body_send, err := ioutil.ReadAll(resp_send.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("INFO ABOUT SEND FILES", string(body_send), resp_proj.StatusCode)
+	SendResult(jStr)
 
 }
