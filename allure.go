@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -13,11 +15,15 @@ var cookie []*http.Cookie
 var tmpCSRF *http.Cookie
 
 type Allure struct {
-	Results []struct {
-		FileName      string `json:"file_name"`
-		ContentBase64 string `json:"content_base64"`
-	} `json:"results"`
+	Results []Results `json:"results"`
 }
+
+type Results struct {
+	FileName      string `json:"file_name"`
+	ContentBase64 string `json:"content_base64"`
+}
+
+var content []Results
 
 func main() {
 
@@ -80,26 +86,35 @@ func main() {
 	method_send := "POST"
 
 	var filesToSend []string
-	//var base64ToSend []string
+	var base64ToSend []string
 
- var x string
- var yx string
+	var bs64 string
 	tmp, _ := ioutil.ReadDir("./allure-result/")
 	for _, t := range tmp {
 		if !t.IsDir() {
 			filesToSend = append(filesToSend, t.Name())
+			bs64 = base64.StdEncoding.EncodeToString([]byte(t.Name()))
+			base64ToSend = append(base64ToSend, bs64)
 		}
 	}
 
-	sendResult:=Allure{
-		Results:[]Results{
-        FileName: x,
-		ContentBase64: yx
-		}
-		}
-		
+	xLen := len(filesToSend)
 
-	req_send, err := http.NewRequest(method_send, url_send, payload_send)
+	for x := 0; x < xLen; x++ {
+		content = append(content, Results{FileName: filesToSend[x], ContentBase64: base64ToSend[x]})
+	}
+
+	Allure := Allure{
+		Results: content,
+	}
+
+	jsonDataSort, _ := json.Marshal(Allure)
+
+	jStr := []byte(jsonDataSort)
+
+	fmt.Println(string(jStr))
+
+	req_send, err := http.NewRequest(method_send, url_send, bytes.NewBuffer(jStr))
 	if err != nil {
 		panic(err)
 	}
@@ -108,7 +123,7 @@ func main() {
 
 	}
 	req_send.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
-	req_send.Header.Add("Content-Type", "multipart/form-data")
+	req_send.Header.Add("Content-Type", "application/json")
 	resp_send, err := client.Do(req_send)
 	if err != nil {
 		panic(err)
@@ -119,6 +134,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(body_send), resp_proj.StatusCode)
+	fmt.Println("INFO ABOUT SEND FILES", string(body_send), resp_proj.StatusCode)
 
 }

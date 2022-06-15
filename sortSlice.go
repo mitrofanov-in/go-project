@@ -16,6 +16,8 @@ func main() {
 
 	test_slice := make([]jStruct, 0)
 	names := []string{"frenk", "jon", "shon", "svon", "clon", "ton", "ozon"}
+
+	fmt.Println(names)
 	ages := []int{20, 21, 21, 19, 18, 16, 62}
 
 	a := len(names)
