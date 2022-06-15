@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
+
+var project string
 
 var cookie []*http.Cookie
 
@@ -56,7 +59,7 @@ func GetAuthParmas(payload_lgn []byte) []*http.Cookie {
 
 func SendResult(jStr []byte) {
 
-	url_send := "http://allure.back.wd.xco.devel.ifx/send-results?project_id=default"
+	url_send := "http://allure.back.wd.xco.devel.ifx/send-results?project_id=" + project
 	method_send := "POST"
 
 	client := &http.Client{}
@@ -70,6 +73,7 @@ func SendResult(jStr []byte) {
 	}
 	req_send.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
 	req_send.Header.Add("Content-Type", "application/json")
+
 	resp_send, err := client.Do(req_send)
 	if err != nil {
 		panic(err)
@@ -86,6 +90,9 @@ func SendResult(jStr []byte) {
 
 func main() {
 
+	arguments := os.Args
+	project = arguments[1]
+
 	payload_lgn := []byte(`{ "username": "xco","password": "xco_interf@x" }`)
 	fmt.Println(string(payload_lgn))
 	GetAuthParmas(payload_lgn)
@@ -97,7 +104,7 @@ func main() {
 	var base64ToSend []string
 
 	var bs64 string
-	tmp, _ := ioutil.ReadDir("./allure-result/")
+	tmp, _ := ioutil.ReadDir("./allure_results/")
 	for _, t := range tmp {
 		if !t.IsDir() {
 			filesToSend = append(filesToSend, t.Name())
