@@ -88,6 +88,43 @@ func SendResult(jStr []byte) {
 
 }
 
+func GenerateReport(project string) {
+
+	execution_name := "execution-from-my-script"
+	execution_from := "http://google.com"
+	execution_type := "teamcity"
+
+	url_gen := "http://allure.back.wd.xco.devel.ifx/generate-report?project_id=" + project + "&execution_name=" + execution_name + "&execution_from=" + execution_from + "&execution_type=" + execution_type
+	method_gen := "GET"
+
+	fmt.Println(url_gen)
+	client := &http.Client{}
+	req_gen, err := http.NewRequest(method_gen, url_gen, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	for i := range cookie {
+		req_gen.AddCookie(cookie[i])
+
+	}
+	req_gen.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
+	//req_gen.Header.Add("Content-Type", "application/json")
+
+	resp_gen, err := client.Do(req_gen)
+	if err != nil {
+		panic(err)
+	}
+	//defer req_gen.Body.Close()
+
+	body_gen, err := ioutil.ReadAll(resp_gen.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("INFO ABOUT SEND FILES", string(body_gen), resp_gen.StatusCode)
+
+}
+
 func main() {
 
 	arguments := os.Args
@@ -95,14 +132,18 @@ func main() {
 
 	payload_lgn := []byte(`{ "username": "xco","password": "xco_interf@x" }`)
 	fmt.Println(string(payload_lgn))
+
+	//Авторизация
+
 	GetAuthParmas(payload_lgn)
 
+	// Сохраняем куки
 	tmpCSRF = cookie[1]
-	fmt.Println("COOCKA", tmpCSRF.Value)
 
 	var filesToSend []string
 	var base64ToSend []string
 
+	// Формируем входной массив json
 	var bs64 string
 	tmp, _ := ioutil.ReadDir("./allure_results/")
 	for _, t := range tmp {
@@ -125,12 +166,17 @@ func main() {
 		Results: content,
 	}
 
+	// Передаем полученный json
 	jsonDataSort, _ := json.Marshal(Allure)
 
 	jStr := []byte(jsonDataSort)
 
 	fmt.Println(string(jStr))
 
+	// Вызываем функцию передачи
 	SendResult(jStr)
+
+	// Генерируем результат
+	GenerateReport(project)
 
 }
