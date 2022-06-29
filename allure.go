@@ -11,9 +11,10 @@ import (
 )
 
 var project string
-
+var url string = os.Getenv("URL_ALLURE")
+var login string = os.Getenv("USER_ALLURE")
+var pass string = os.Getenv("PASS_ALLURE")
 var cookie []*http.Cookie
-
 var tmpCSRF *http.Cookie
 
 type Allure struct {
@@ -27,13 +28,17 @@ type Results struct {
 
 var content []Results
 
+type Auth struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 func GetAuthParmas(payload_lgn []byte) []*http.Cookie {
-	url_lgn := "http://allure.back.wd.xco.devel.ifx/login"
+	url_lgn := url + "/login"
 	method := "POST"
 
 	client := &http.Client{}
 	req_lgn, err := http.NewRequest(method, url_lgn, bytes.NewBuffer(payload_lgn))
-
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -49,7 +54,6 @@ func GetAuthParmas(payload_lgn []byte) []*http.Cookie {
 	fmt.Println("PRINT ALL COOCKIE")
 	for _, c := range cookie {
 		fmt.Println(c.Name, c.Value)
-
 	}
 
 	//SAVE COOCKIE CSRF
@@ -59,7 +63,7 @@ func GetAuthParmas(payload_lgn []byte) []*http.Cookie {
 
 func SendResult(jStr []byte) {
 
-	url_send := "http://allure.back.wd.xco.devel.ifx/send-results?project_id=" + project
+	url_send := url + "/send-results?project_id=" + project
 	method_send := "POST"
 
 	client := &http.Client{}
@@ -94,7 +98,7 @@ func GenerateReport(project string) {
 	execution_from := "http://google.com"
 	execution_type := "teamcity"
 
-	url_gen := "http://allure.back.wd.xco.devel.ifx/generate-report?project_id=" + project + "&execution_name=" + execution_name + "&execution_from=" + execution_from + "&execution_type=" + execution_type
+	url_gen := url + "/generate-report?project_id=" + project + "&execution_name=" + execution_name + "&execution_from=" + execution_from + "&execution_type=" + execution_type
 	method_gen := "GET"
 
 	fmt.Println(url_gen)
@@ -109,7 +113,6 @@ func GenerateReport(project string) {
 
 	}
 	req_gen.Header.Add("X-CSRF-TOKEN", tmpCSRF.Value)
-	//req_gen.Header.Add("Content-Type", "application/json")
 
 	resp_gen, err := client.Do(req_gen)
 	if err != nil {
@@ -117,12 +120,13 @@ func GenerateReport(project string) {
 	}
 	//defer req_gen.Body.Close()
 
-	body_gen, err := ioutil.ReadAll(resp_gen.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("INFO ABOUT SEND FILES", string(body_gen), resp_gen.StatusCode)
-
+	/*
+		body_gen, err := ioutil.ReadAll(resp_gen.Body)
+		if err != nil {
+			panic(err)
+		}
+	*/
+	fmt.Println("INFO ABOUT SEND FILES", resp_gen.StatusCode)
 }
 
 func main() {
@@ -130,7 +134,12 @@ func main() {
 	arguments := os.Args
 	project = arguments[1]
 
-	payload_lgn := []byte(`{ "username": "xco","password": "xco_interf@x" }`)
+	lgn := Auth{
+		Username: login,
+		Password: pass,
+	}
+	payloadDataSort, _ := json.Marshal(lgn)
+	payload_lgn := []byte(payloadDataSort)
 	fmt.Println(string(payload_lgn))
 
 	//Авторизация
@@ -142,19 +151,20 @@ func main() {
 
 	var filesToSend []string
 	var base64ToSend []string
+	var path string
+	path = "./allure_results/"
 
 	// Формируем входной массив json
 	var bs64 string
-	tmp, _ := ioutil.ReadDir("./allure_results/")
+	tmp, _ := ioutil.ReadDir(path)
 	for _, t := range tmp {
 		if !t.IsDir() {
 			filesToSend = append(filesToSend, t.Name())
-			bs64 = base64.StdEncoding.EncodeToString([]byte(t.Name()))
-			base64ToSend = append(base64ToSend, bs64)
+			content, _ := ioutil.ReadFile(path + t.Name())
+			bs64 = base64.StdEncoding.EncodeToString([]byte(content))
+			base64ToSend = append(base64ToSend, string(bs64))
 		}
 	}
-	fmt.Println("1строка", filesToSend)
-	fmt.Println("2строка", base64ToSend)
 
 	xLen := len(filesToSend)
 
