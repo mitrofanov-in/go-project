@@ -51,6 +51,9 @@ func Calculate(z shape) {
 func main() {
 	X := square{10}
 	fmt.Println("Perimeter:", X.Perimeter())
+	fmt.Println("test Area", X.Area())
+	var s float64 = shape.Perimeter(square{10})
+	fmt.Println("Read s ", s)
 	Calculate(X)
 	y := circle{5}
 	Calculate(y)

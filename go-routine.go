@@ -2,27 +2,47 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"net/http"
+	"sync"
 	"time"
 )
 
-var result int = 0
-
-func j(int) {
-	for i := 0; i < 10; i++ {
-		result += i
+func main() {
+	urls := []string{
+		"https://www.boostra.ru",
+		"https://fssp.gov.ru",
 	}
-	fmt.Print(result)
+
+	var wg sync.WaitGroup
+
+	for _, url := range urls {
+		wg.Add(1)
+
+		go func(url string) {
+			doHTTP(url)
+			wg.Done()
+		}(url)
+	}
+
+	wg.Wait()
 }
 
-func main() {
-	start := time.Now()
-	duration := time.Since(start)
+func doHTTP(url string) {
+	t := time.Now()
 
-	go j(1)
-	fmt.Println(result)
+	client := &http.Client{}
 
-	go j(101)
-	fmt.Println(result)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("Смотрим смторим", url, err.Error())
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
 
-	fmt.Println(duration)
+	fmt.Println("Статус страницы", url, time.Since(t).Milliseconds())
+
 }
