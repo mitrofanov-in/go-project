@@ -19,10 +19,10 @@ func main() {
 	for _, url := range urls {
 		wg.Add(1)
 
-		go func(url string) {
+		go func() {
 			doHTTP(url)
 			wg.Done()
-		}(url)
+		}()
 	}
 
 	wg.Wait()

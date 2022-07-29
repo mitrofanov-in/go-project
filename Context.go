@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -30,9 +31,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	r.ParseForm()
 	ids := r.FormValue("id")
-	if ids == "huy" {
+	if ids == "id1" {
 		fmt.Println("Проверочка")
-		w.Write([]byte(ids))
+		io.WriteString(w, ids)
 	}
 }
 
@@ -41,7 +42,7 @@ func processLongTask(ctx context.Context) string {
 
 	select {
 	case <-time.After(2 * time.Second):
-		return fmt.Sprintf("нет ид", id)
+		return fmt.Sprint("нет ид", id)
 	case <-ctx.Done():
 		log.Println("завершаем")
 		return "жжжопа"
